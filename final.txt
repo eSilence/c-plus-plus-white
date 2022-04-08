@@ -1,0 +1,147 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <sstream>
+//#include <istream>
+using namespace std;
+
+class MyException { //------------------------------- MyException -----------------
+public:
+	string mes;
+	string n_;
+	MyException() { mes = "";}
+	MyException(string s, string n) { mes = s; n_ = n; }
+};
+
+class Date { //------------------------------- Date -----------------
+	friend istream& operator>>( istream& in, Date &date);
+	friend ostream& operator<<( ostream& in, Date &date);
+public:
+	Date(int d=1, int m=1, int y=1) 
+		:day(d), month(m), year(y){}
+	int GetYear() const  {return year;}
+	int GetMonth() const {return month;}
+	int GetDay() const   {return day;}
+  string date_to_str(){
+	  return to_string(year) + to_string(month) + to_string(day);
+  }
+  
+private:
+	int year, month, day;
+};
+
+bool operator<(const Date& lhs, const Date& rhs){
+	return lhs.GetYear() * 365 + lhs.GetMonth()*31 + lhs.GetDay() < rhs.GetYear()*365 + rhs.GetMonth()*31 + rhs.GetDay();
+}
+ostream& operator<<( ostream& out, Date &date){
+	out << setw(4) << setfill('0') << date.year << "-"
+		<< setw(2) << setfill('0') << date.month << "-"
+		<< setw(2) << setfill('0') << date.day;
+	return out;
+}
+
+istream& operator>>( istream& in, Date &date){
+	Date d;
+	char c1, c2;
+	if (in >> d.year >> c1 >> d.month >> c2 >> d.day && c1 == '-' && c2 == '-'){
+		if (!(d.month >= 1 && d.month<=12)) 
+			throw MyException("\nMonth value is invalid: ", to_string(d.month));
+		if (!(d.day >= 1 && d.day<=31)) 
+			throw MyException("\nDay value is invalid: ", to_string(d.day));
+		date = d;
+	}
+	else
+		throw MyException("\nWrong date format: ", "");
+
+	return in;
+}
+
+class Database { //------------------------------- Database -----------------
+public:
+	void AddEvent(const Date& date, const string& event){
+		record[date].insert(event);
+	}
+
+	bool DeleteEvent(const Date& date, const string& event){
+		if (record.count(date) > 0 && record[date].count(event) > 0){
+			record[date].erase(event);
+			return true;
+		}
+		return false;
+	}
+	
+	int  DeleteDate(const Date& date){
+		int n = 0;
+		if (record.count(date) > 0)
+			n = record.at(date).size();
+		if (n > 0)
+			record.erase(date);
+		return n;
+	}
+
+	string Find(const Date& date) const{
+		string result = "";
+		if (record.count(date) > 0)
+			for(string s: record.at(date))
+				if (result == "")
+					result = s;
+				else
+					result = result + "\n" + s;
+		return result;
+	}
+  
+	void Print() const{
+		for (pair<Date,set<string>>  rec: record){
+			for (string s: rec.second){
+				cout << endl << rec.first << " "<< s ;
+			}
+		}
+	}
+private:
+	map<Date, set<string>> record;
+};
+
+int main() {  //------------------------------- main -----------------
+  Database db;
+  ifstream in("1.txt");
+  string command;// = "Add -0-12-";
+  while (getline(cin, command)){
+	  if (command == "") continue;
+	  stringstream ss(command); 
+	  string com, date_str, event = "";
+	  Date date;
+	  try {
+		  ss >> com; 
+		  if (!(com=="Add" ||com=="Del" ||com=="Find"||com=="Print"))
+			  throw MyException ("\nUnknown command: ", com);
+		  
+		  if (com == "Print") db.Print();
+		  else{
+			  ss >> date_str;
+			  if (ss.peek())
+				  ss >> event;
+			  if ((stringstream(date_str) >> date).peek()!=EOF)
+				  throw MyException("\nWrong date format: ", "");
+
+			  if (com == "Add") db.AddEvent(date, event);
+			  else if(com == "Del" && event!="") 
+				  cout << endl << (db.DeleteEvent(date, event)? 
+					  "Deleted successfully": "Event not found") ;
+
+			  else if(com == "Del" && event=="") {
+				  int n = db.DeleteDate(date); 
+				  cout << endl << "Deleted "<< n << " events" ;
+			  }
+			  else if(com == "Find") cout << db.Find(date);
+		  }
+	  } 
+	  catch (MyException e) { cout << e.mes << (e.n_ ==""?date_str: e.n_); }
+
+  }
+	
+  return 0;
+}
