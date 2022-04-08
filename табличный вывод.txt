@@ -1,0 +1,78 @@
+#include<iostream>
+#include<fstream>
+#include<iomanip>
+#include<vector>
+#include<sstream>
+#include<string>
+
+using namespace std;
+
+int main(){
+	ifstream fin("input.txt");
+	stringstream ss;
+	if (!fin)
+		return 1;
+
+	int n, m;
+	fin >> n >> m;
+	vector< vector<int> > values;
+	for (int i = 0; i < n; i++){
+		vector<int> tmp;
+		for (int j = 0; j < m; j++){
+			int value;
+			fin >> value;
+			fin.ignore(1);
+			tmp.push_back(value);
+		}
+		values.push_back(tmp);
+	}
+	cout << setfill(' ');
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++){
+			cout<<setw(10)<<values[i][j];
+			if (j<m-1) cout<<' ';
+		}
+		if (i<n-1) 
+			cout<<endl;
+	}
+
+	return 0;}
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+int main() {
+  ifstream input("input.txt");
+  
+  int n, m;
+  input >> n >> m;
+
+  // перебираем строки
+  for (int i = 0; i < n; ++i) {
+    // перебираем столбцы
+    for (int j = 0; j < m; ++j) {
+      // считываем очередное число
+      int x;
+      input >> x;
+      // пропускаем следующий символ
+      input.ignore(1);
+      // выводим число в поле ширины 10
+      cout << setw(10) << x;
+      // выводим пробел, если только этот столбец не последний
+      if (j != m - 1) {
+        cout << " ";
+      }
+    }
+    // выводим перевод строки, если только эта строка не последняя
+    if (i != n - 1) {
+      cout << endl;
+    }
+  }  
+
+  return 0;
+}

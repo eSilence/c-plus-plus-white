@@ -1,0 +1,31 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+
+using namespace std;
+
+int main(){
+	ifstream f("input.txt");
+	if (!f)
+		return 1;
+	string line;
+	while (getline(f, line)) {
+		cout << line << endl;
+	}
+}
+
+#include<iostream>
+#include<fstream>
+#include<string>
+
+using namespace std;
+
+int main(){
+	ifstream fin("com_3.txt");
+	ofstream fout("output.txt");
+	if (!fin)
+		return 1;
+	string line;
+	while (getline(fin, line)) {
+		fout << line << endl;
+	}	return 0;}
